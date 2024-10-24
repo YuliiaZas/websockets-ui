@@ -1,7 +1,6 @@
-import { Message, Player } from '../types/MessageTypes'
+import { Player } from '../types/messageTypes'
 import ws from 'ws'
-
-const activePlayers = new Set<Player['name']>()
+import { randomUUID } from 'node:crypto'
 
 interface sendRegResponseData {
     name: string
@@ -26,33 +25,38 @@ const sendRegResponse = (
     )
 }
 export const handleRegister = (
-    parsedMessage: Message,
+    playerData: Omit<Player, 'index' | 'isOnline'>,
     ws: ws,
-    users: Map<string, Player>
+    users: Map<Player['name'], Player>,
+    wsToPlayerName: Map<ws, Player['name']>
 ) => {
-    const Player = JSON.parse(parsedMessage.data.toString()) as Player
-    const { name, index, password } = Player
-    if (users.has(name) && activePlayers.has(name)) {
+    const { name, password } = playerData
+    if (users.get(name)?.ws) {
         sendRegResponse(
             ws,
-            { name, index },
-            'User already exists and is active'
+            { name, index: -1 },
+            'User already exists and is online'
         )
     } else if (users.has(name)) {
         const PlayerDataFromBase = users.get(name) as Player
         if (PlayerDataFromBase.password === password) {
-            activePlayers.add(name)
-            sendRegResponse(ws, { name, index })
+            users.set(name, { ...PlayerDataFromBase, ws: ws })
+            wsToPlayerName.set(ws, name)
+            sendRegResponse(ws, { name, index: PlayerDataFromBase.index })
         } else {
-            sendRegResponse(ws, { name, index }, 'Wrong password')
+            sendRegResponse(ws, { name, index: -1 }, 'Wrong password')
         }
     } else {
-        users.set(name, Player)
-        sendRegResponse(ws, { name, index })
-        activePlayers.add(name)
+        const newUser = { ...playerData, index: randomUUID(), isOnline: true }
+        users.set(name, newUser)
+        sendRegResponse(ws, { name, index: newUser.index })
+        wsToPlayerName.set(ws, name)
     }
 
     ws.on('close', () => {
-        activePlayers.delete(name)
+        const username = wsToPlayerName.get(ws) as string
+        const PlayerDataFromBase = users.get(username) as Player
+        wsToPlayerName.delete(ws)
+        users.set(username, { ...PlayerDataFromBase, ws: null })
     })
 }

@@ -1,6 +1,7 @@
+import ws from 'ws'
 export type MessageType =
     | 'reg'
-    | 'create_game'
+    | 'create_room'
     | 'start_game'
     | 'turn'
     | 'attack'
@@ -18,4 +19,5 @@ export interface Player {
     name: string
     password: string
     index: number | string
+    ws: ws | null
 }
