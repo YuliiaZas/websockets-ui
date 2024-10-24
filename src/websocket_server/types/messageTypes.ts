@@ -6,6 +6,7 @@ export type MessageType =
     | 'turn'
     | 'attack'
     | 'finish'
+    | 'add_user_to_room'
     | 'update_room'
     | 'update_winners'
 
@@ -20,4 +21,5 @@ export interface Player {
     password: string
     index: number | string
     ws: ws | null
+    hasOwnRoom: boolean
 }

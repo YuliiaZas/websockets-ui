@@ -8,7 +8,7 @@ const webSocketServer = new ws.Server({ port: 3000 })
 
 const users = new Map<Player['name'], Player>()
 const wsToPlayerName = new Map<ws, Player['name']>()
-const rooms = new Map<ws, Room>()
+const rooms = new Map<string, Room>()
 const winners = new Map<Player['name'], Winner>()
 webSocketServer.on('connection', (ws) => {
     ws.on('message', (message) => {
@@ -28,7 +28,8 @@ webSocketServer.on('connection', (ws) => {
                 createRoom(ws, rooms, users, wsToPlayerName)
                 updateRoomForAll(webSocketServer, Array.from(rooms.values()))
                 break
-            case 'start_game':
+            case 'add_user_to_room':
+                console.log(parsedMessage)
                 break
             case 'turn':
                 break

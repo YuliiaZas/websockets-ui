@@ -11,18 +11,19 @@ const createUpdateRoomResponse = (rooms: Room[]) => {
 }
 export const createRoom = (
     ws: ws,
-    rooms: Map<ws, Room>,
+    rooms: Map<string, Room>,
     users: Map<Player['name'], Player>,
     wsToPlayerName: Map<ws, Player['name']>
 ) => {
-    if (rooms.has(ws)) return
     const playerName = wsToPlayerName.get(ws) as string
     const player = users.get(playerName) as Player
+    if (player.hasOwnRoom) return
     const roomId = randomUUID()
-    rooms.set(ws, {
+    rooms.set(roomId, {
         roomId,
         roomUsers: [{ name: player.name, index: player.index }],
     })
+    player.hasOwnRoom = true
 }
 export const updateRoomForAll = (wss: WebSocketServer, rooms: Room[]) => {
     const response = createUpdateRoomResponse(rooms)
