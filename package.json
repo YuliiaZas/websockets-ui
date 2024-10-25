@@ -6,7 +6,7 @@
     "type": "module",
     "scripts": {
         "start": "node ./index.js",
-        "start:dev": "nodemon ./index.js",
+        "start:dev": "NODE_ENV=dev nodemon ./index.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "Andrei Auchynnikau",
@@ -16,6 +16,7 @@
         "nodemon": "^2.0.16"
     },
     "dependencies": {
+        "dotenv": "^16.4.5",
         "ws": "^8.8.0"
     }
 }
