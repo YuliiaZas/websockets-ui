@@ -19,6 +19,6 @@ export const addUserToRoom = ({
     const player = users.get(wsToPlayerName.get(ws)!) as Player
     const room = rooms.get(indexRoom) as Room
     if (room.roomUsers.find((user) => user.name === player.name)) return
-    room.roomUsers.push({ name: player.name, index: player.index })
+    room.roomUsers.push({ name: player.name, index: player.ws! })
     rooms.set(indexRoom, room)
 }

@@ -21,7 +21,7 @@ export const createRoom = (
     const roomId = randomUUID()
     rooms.set(roomId, {
         roomId,
-        roomUsers: [{ name: player.name, index: player.index }],
+        roomUsers: [{ name: player.name, index: player.ws! }],
     })
     player.hasOwnRoom = true
 }
@@ -36,7 +36,7 @@ export const updateRoomForAll = (wss: WebSocketServer, rooms: Room[]) => {
 
 interface RoomUser {
     name: string
-    index: number | string
+    index: ws
 }
 
 export interface Room {

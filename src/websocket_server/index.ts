@@ -5,6 +5,7 @@ import { createRoom, Room, updateRoomForAll } from './helpers/updateRoomForAll'
 import { updateWinnersForAll, Winner } from './helpers/updateWinnersForAll'
 import { addUserToRoom } from './helpers/addUserToRoom'
 import { createGame } from './helpers/createGame'
+import { addShipsData, handleAddShips } from './handlers/handleAddShips'
 
 const webSocketServer = new ws.Server({ port: 3000 })
 
@@ -12,8 +13,8 @@ const users = new Map<Player['name'], Player>()
 const wsToPlayerName = new Map<ws, Player['name']>()
 const rooms = new Map<string, Room>()
 const winners = new Map<Player['name'], Winner>()
+const games = new Map<string, addShipsData[]>()
 webSocketServer.on('connection', (ws, req) => {
-    console.log(req.socket.remoteAddress)
     ws.on('message', (message) => {
         const parsedMessage = JSON.parse(message.toString()) as Message
 
@@ -44,9 +45,10 @@ webSocketServer.on('connection', (ws, req) => {
                 createGame(users, rooms, indexRoom)
                 break
             case 'add_ships':
-                console.log(parsedMessage)
+                handleAddShips(parsedMessage.data, games, ws)
                 break
             case 'attack':
+                console.log(parsedMessage)
                 break
             case 'finish':
                 break
