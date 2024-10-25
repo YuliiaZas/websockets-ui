@@ -7,6 +7,7 @@ export type MessageType =
     | 'attack'
     | 'finish'
     | 'add_user_to_room'
+    | 'add_ships'
     | 'update_room'
     | 'update_winners'
 

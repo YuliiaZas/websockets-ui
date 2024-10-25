@@ -3,6 +3,8 @@ import { Message, Player } from './types/messageTypes'
 import { handleRegister } from './handlers/handleRegister'
 import { createRoom, Room, updateRoomForAll } from './helpers/updateRoomForAll'
 import { updateWinnersForAll, Winner } from './helpers/updateWinnersForAll'
+import { addUserToRoom } from './helpers/addUserToRoom'
+import { createGame } from './helpers/createGame'
 
 const webSocketServer = new ws.Server({ port: 3000 })
 
@@ -10,7 +12,8 @@ const users = new Map<Player['name'], Player>()
 const wsToPlayerName = new Map<ws, Player['name']>()
 const rooms = new Map<string, Room>()
 const winners = new Map<Player['name'], Winner>()
-webSocketServer.on('connection', (ws) => {
+webSocketServer.on('connection', (ws, req) => {
+    console.log(req.socket.remoteAddress)
     ws.on('message', (message) => {
         const parsedMessage = JSON.parse(message.toString()) as Message
 
@@ -29,9 +32,19 @@ webSocketServer.on('connection', (ws) => {
                 updateRoomForAll(webSocketServer, Array.from(rooms.values()))
                 break
             case 'add_user_to_room':
-                console.log(parsedMessage)
+                const indexRoom = JSON.parse(parsedMessage.data).indexRoom
+                addUserToRoom({
+                    ws,
+                    rooms,
+                    users,
+                    wsToPlayerName,
+                    indexRoom,
+                })
+                updateRoomForAll(webSocketServer, Array.from(rooms.values()))
+                createGame(users, rooms, indexRoom)
                 break
-            case 'turn':
+            case 'add_ships':
+                console.log(parsedMessage)
                 break
             case 'attack':
                 break

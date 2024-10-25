@@ -33,12 +33,13 @@ export const updateRoomForAll = (wss: WebSocketServer, rooms: Room[]) => {
         }
     })
 }
+
+interface RoomUser {
+    name: string
+    index: number | string
+}
+
 export interface Room {
     roomId: number | string
-    roomUsers: [
-        {
-            name: string
-            index: number | string
-        }
-    ]
+    roomUsers: RoomUser[]
 }

@@ -47,7 +47,12 @@ export const handleRegister = (
             sendRegResponse(ws, { name, index: -1 }, 'Wrong password')
         }
     } else {
-        const newUser = { ...playerData, index: randomUUID(), isOnline: true }
+        const newUser = {
+            ...playerData,
+            index: randomUUID(),
+            isOnline: true,
+            ws,
+        }
         users.set(name, newUser)
         sendRegResponse(ws, { name, index: newUser.index })
         wsToPlayerName.set(ws, name)
