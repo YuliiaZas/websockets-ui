@@ -50,11 +50,7 @@ webSocketServer.on('connection', (ws, req) => {
             case 'attack':
                 console.log(parsedMessage)
                 break
-            case 'finish':
-                break
-            case 'update_room':
-                break
-            case 'update_winners':
+            case 'randomAttack':
                 break
             default:
                 ws.close(500, 'Wrong message type')

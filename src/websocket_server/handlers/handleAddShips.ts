@@ -15,7 +15,7 @@ export const handleAddShips = (
     const game = games.get(gameData.gameId) as addShipsData[]
     if (game?.length === 2) {
         startGame(game)
-        games.delete(gameData.gameId)
+        console.log(game[0].ships)
     }
 }
 
