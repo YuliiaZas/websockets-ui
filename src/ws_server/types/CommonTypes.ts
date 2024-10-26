@@ -18,4 +18,7 @@ export type ShipInfoType = {
     type: ShipSizeEnum,
 }
 
-export type ConnectionType = { userIndex: string | number ,ws: WebSocket }
+export type ConnectionType = {
+    userIndex: string | number ,
+    ws: WebSocket
+}
