@@ -1,0 +1,1 @@
+export const deepStringify = obj => JSON.stringify({...obj, data: JSON.stringify(obj.data)});
