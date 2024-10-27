@@ -15,11 +15,11 @@ export const createGame = (indexRoom: string | number) => {
     const userOneConnection = connectionsDb.getConnection(playerOne!.index)
     const userTwoConnection = connectionsDb.getConnection(playerTwo!.index)
 
-    const newGameData = gamesDb.createGame(playerOne!.index, playerTwo!.index)
+    const { idGame, players} = gamesDb.createGame(playerOne!.index, playerTwo!.index)
 
-    const idForGame = newGameData.idGame
-    const idForPlayerOne = newGameData.players[0]!.playerId
-    const idForPlayerTwo = newGameData.players[1]!.playerId
+    const idForGame = idGame
+    const idForPlayerOne = players[0]!.playerId
+    const idForPlayerTwo = players[1]!.playerId
 
     const responseOne = prepareJsonResponse(MessageTypeEnum.CreateGame, JSON.stringify({idGame: idForGame, idPlayer: idForPlayerOne}))
     const responseTwo = prepareJsonResponse(MessageTypeEnum.CreateGame, JSON.stringify({idGame: idForGame, idPlayer: idForPlayerTwo}))

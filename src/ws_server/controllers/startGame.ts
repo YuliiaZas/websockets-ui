@@ -1,9 +1,9 @@
-import {ConnectionsDb} from "../db/connections.db";
 import {GamesDb} from "../db/games.db";
 import {prepareJsonResponse} from "../utils/prepareJsonResponse";
 import {MessageTypeEnum} from "../enums/MessageTypeEnum";
+import {turn} from "./turn";
+import {getClientConnection} from "../utils/getClientConnection";
 
-const connectionDb = ConnectionsDb.getInstance()
 const games = GamesDb.getInstance()
 
 export const startGame = (idGame: number | string) => {
@@ -11,8 +11,8 @@ export const startGame = (idGame: number | string) => {
 
     const [playerOne, playerTwo] = game.players
 
-    const playerOneConnection = connectionDb.getConnection(playerOne!.index as string)
-    const playerTwoConnection = connectionDb.getConnection(playerTwo!.index as string)
+    const playerOneConnection = getClientConnection({ playerIndex: playerOne!.playerId })
+    const playerTwoConnection = getClientConnection({ playerIndex: playerTwo!.playerId })
 
     const messageOne = prepareJsonResponse(
         MessageTypeEnum.StartGame,
@@ -33,4 +33,6 @@ export const startGame = (idGame: number | string) => {
 
     playerOneConnection.send(messageOne)
     playerTwoConnection.send(messageTwo)
+
+    turn(playerOne!.playerId, idGame)
 }

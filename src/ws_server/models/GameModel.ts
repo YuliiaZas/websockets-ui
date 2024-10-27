@@ -1,8 +1,8 @@
-import {ShipInfoType} from "../types/CommonTypes";
+import {PlayerType } from "../types/CommonTypes";
 
 export class GameModel {
     idGame: number | string
-    players: Array<{ index: number | string,  playerId: number | string, ships: Array<ShipInfoType>, shipsStatus: Array<unknown>  }> = []
+    players: PlayerType[] = []
 
     constructor(obj: Partial<GameModel>) {
         Object.assign(this, obj)

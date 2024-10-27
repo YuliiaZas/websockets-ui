@@ -1,5 +1,7 @@
 import {GameModel} from "../models/GameModel";
 import {ShipInfoType} from "../types/CommonTypes";
+import type {AttackType} from "../types/ClientMessageType";
+import {AttackStatusEnum} from "../enums/AttackStatusEnum";
 
 export class GamesDb {
     public static instance: GamesDb;
@@ -19,6 +21,10 @@ export class GamesDb {
 
     getGame(idGame: string | number):GameModel  {
         return this.games.find(game => game.idGame === idGame)!
+    }
+
+    getGameByPlayerId(playerId:  string | number):GameModel {
+        return this.games.find(game => game.players.map(player => player.playerId).includes(playerId))!
     }
 
     /**
@@ -59,7 +65,8 @@ export class GamesDb {
                         if (player.playerId === playerId) {
                             return {
                                 ...player,
-                                ships: ships
+                                ships: ships,
+                                shipsStatus: ships
                             };
                         }
                         return player;
@@ -68,5 +75,77 @@ export class GamesDb {
             }
             return game;
         });
+    }
+
+    checkAttackResults(data: AttackType): AttackStatusEnum {
+        const { gameId, indexPlayer, x, y } = data
+        let currentGame = this.games.find(game => game.idGame === gameId)
+        //TODO change  let enemyShips = currentGame?.players.find(player => player.playerId != indexPlayer)?.shipsStatus
+        let enemyShips = currentGame?.players.find(player => player.playerId == indexPlayer)?.shipsStatus
+
+        let result = AttackStatusEnum.Miss
+
+        enemyShips = enemyShips!.map(ship => {
+           let shipPositions = []
+
+            let shipY = ship.position.y
+            let shipX = ship.position.x
+
+            for (let i = 0; i < ship.length; i++) {
+                if (ship.direction) {
+                    shipPositions.push(`${shipX}${shipY + i}`)
+                } else {
+                    shipPositions.push(`${shipX + i}${shipY}`)
+                }
+            }
+
+            const attackXY = `${x}${y}`
+
+            if (shipPositions.includes(attackXY)) {
+                const hasShipLengthAfterAttack = ship.length  > 1
+
+                if (hasShipLengthAfterAttack) {
+                    result = AttackStatusEnum.Shot
+                    return {
+                        ...ship,
+                        length: ship.length - 1
+                    }
+                } else {
+                    result =  AttackStatusEnum.Killed
+                    return {
+                        ...ship,
+                        length: 0
+                    }
+                }
+
+            } else {
+                return ship
+            }
+        })
+
+        currentGame = {
+            idGame: currentGame!.idGame,
+            players: currentGame!.players.map(player => {
+                //TODO change on player.playerId == indexPlayer
+                    if (player.playerId != indexPlayer) {
+                        return player
+                    } else {
+                        return {
+                            ...player,
+                            shipsStatus: enemyShips
+                        }
+                    }
+                })
+        }
+
+        this.games = this.games.map(game => {
+            if (game.idGame !== gameId) {
+                return game
+            } else {
+                return currentGame!
+            }
+        })
+
+        return result!
     }
 }

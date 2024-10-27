@@ -1,10 +1,17 @@
 import {RawData, Server, type WebSocket} from 'ws';
 import {MessageTypeEnum} from "./enums/MessageTypeEnum";
-import type {AddShipsType, AddUserToRoomType, ClientMessageType, LoginCreateType} from "./types/ClientMessageType";
+import type {
+    AddShipsType,
+    AddUserToRoomType,
+    AttackType,
+    ClientMessageType,
+    LoginCreateType
+} from "./types/ClientMessageType";
 import {createLoginClient} from "./controllers/createLoginClient";
 import {createRoom} from "./controllers/createRoom";
 import {addClientToRoom} from "./controllers/addClientToRoom";
 import {addShips} from "./controllers/addShips";
+import {attack} from "./controllers/attack";
 
 export const startWsServer = () => {
     const PORT = process.env.PORT || 3000
@@ -62,7 +69,7 @@ export const incomingClientMessageHandler = (rawData: RawData, ws: WebSocket, cl
             break
         }
         case MessageTypeEnum.Attack: {
-            attack(clientMessageWithParsedData, ws)
+            attack(clientMessageWithParsedData as ClientMessageType<AttackType>)
             break
         }
         case MessageTypeEnum.RandomAttack: {
@@ -75,9 +82,6 @@ export const incomingClientMessageHandler = (rawData: RawData, ws: WebSocket, cl
     }
 }
 
-const attack = (clientMessage: ClientMessageType, ws: WebSocket) => {
-    console.log('attack',clientMessage, ws.send)
-}
 
 const randomAttack = (clientMessage: ClientMessageType, ws: WebSocket) => {
     console.log('randomAttack',clientMessage, ws.send)

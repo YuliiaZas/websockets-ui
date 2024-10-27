@@ -17,7 +17,7 @@ export class ConnectionsDb {
         return this.connections
     }
 
-    getConnection(clientIndex: string): WebSocket {
+    getConnection(clientIndex: string | number): WebSocket {
         return this.connections.find(connection => connection.userIndex === clientIndex)!.ws
     }
 
