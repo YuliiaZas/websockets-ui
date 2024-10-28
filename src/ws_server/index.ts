@@ -16,8 +16,10 @@ import {randomAttack} from "./controllers/randomAttack";
 import {singleMode} from "./controllers/singleMode";
 import {GamesDb} from "./db/games.db";
 import {finish} from "./controllers/finish";
+import {ConnectionsDb} from "./db/connections.db";
 
 const gamesDB = GamesDb.getInstance()
+const connectionsDb = ConnectionsDb.getInstance()
 
 export const startWsServer = () => {
     const PORT = process.env.PORT || 3000
@@ -44,6 +46,7 @@ export const onConnection = (ws: WebSocket ) => {
 
             if ( playerThatLeftConnected ) {
                 finish(playerThatLeftConnected.index, gameWithDisconnectedPlayer.idGame)
+                connectionsDb.deleteConnection(clientIndex)
             }
 
             console.log('User was disconnected');
