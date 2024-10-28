@@ -1,6 +1,7 @@
 import { WebSocketServer } from "ws";
 import { players, rooms, games, wsToPlayer } from '../db.ts'
 import { uid4 as uid } from 'uuid';
+import { error } from "console";
 
 
 
@@ -220,7 +221,36 @@ function handleJoinRoom(ws: WebSocket, request: any, server: WebSocketServer) {
 }
 
 function handleAddShips(ws: WebSocket, request: any) {
-    // Initialize the game state and notify both players
+    const {gameId, ships, indexPlayer } = request.data;
+    const game = games.get(gameId);
+
+    if(!game) {
+        ws.send(JSON.stringify({
+            type: 'error',
+            data: {message: 'Game not found'},
+            id: 0
+        }))
+        return;
+    }
+
+    game.players[indexPlayer] = {...game.players[indexPlayer], ships};
+    const allPlayersHaveShips = Object.values(game.players).every((player) => player.ships && player.ships.length > 0);
+
+    if(allPlayersHaveShips) {
+        for (const [socket, playerId] of wsToPlayer.entries()) {
+            const startGameResponse = JSON.stringify({
+                type: 'statr_game',
+                data: {
+                    ships: game.players[playerId].ships,
+                    currentPlayerIndex: playerId
+                },
+                id: 0
+            });
+            if (game.players[playerId]) { // Ensure the player is part of the game
+                socket.send(startGameResponse);
+            }
+        }
+    }
 }
 
 function handleTurn(ws: WebSocket, request: any) {
