@@ -13,6 +13,7 @@ import {addClientToRoom} from "./controllers/addClientToRoom";
 import {addShips} from "./controllers/addShips";
 import {attack} from "./controllers/attack";
 import {randomAttack} from "./controllers/randomAttack";
+import {singleMode} from "./controllers/singleMode";
 
 export const startWsServer = () => {
     const PORT = process.env.PORT || 3000
@@ -75,6 +76,10 @@ export const incomingClientMessageHandler = (rawData: RawData, ws: WebSocket, cl
         }
         case MessageTypeEnum.RandomAttack: {
             randomAttack(clientMessageWithParsedData as ClientMessageType<RandomAttackType>)
+            break
+        }
+        case MessageTypeEnum.SinglePlay:{
+            singleMode(clientIndex)
             break
         }
         default: {

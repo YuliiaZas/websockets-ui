@@ -2,6 +2,7 @@ import {GameModel} from "../models/GameModel";
 import {ShipInfoType} from "../types/CommonTypes";
 import type {AttackType} from "../types/ClientMessageType";
 import {AttackStatusEnum} from "../enums/AttackStatusEnum";
+import {ShipSizeEnum} from "../enums/ShipSizeEnum";
 
 export class GamesDb {
     public static instance: GamesDb;
@@ -32,14 +33,16 @@ export class GamesDb {
      */
     createGame(clientOneIndex: string | number, clientTwoIndex: string | number): GameModel {
         const idGame = new Date().getTime().toString()
+
         const playerOne = {
-            playerId: new Date().getTime().toString(),
+            playerId: clientOneIndex,
             ships: [],
             shipsStatus: [],
             index: clientOneIndex
         }
+
         const playerTwo = {
-            playerId: new Date().getTime().toString(),
+            playerId: clientTwoIndex,
             ships: [],
             shipsStatus: [],
             index: clientTwoIndex
@@ -67,14 +70,15 @@ export class GamesDb {
                 return {
                     ...game,
                     players: game.players.map(player => {
-
                         if (player.playerId === playerId) {
                             return {
                                 ...player,
                                 ships: ships,
-                                shipsStatus: ships
+                                shipsStatus: ships,
+                                attackStory: []
                             };
                         }
+
                         return player;
                     })
                 };
@@ -205,5 +209,71 @@ export class GamesDb {
             x: +randomAttack.slice(0, 1),
             y: +randomAttack.slice(1),
         }
+    }
+
+    createShipsForBot(): ShipInfoType[] {
+        return [
+            {
+                position: { x: 2, y: 0 },
+                direction: true,
+                type: ShipSizeEnum.Huge,
+                length: 4
+            },
+            {
+                position: { x: 8, y: 1 },
+                direction: true,
+                type: ShipSizeEnum.Large,
+                length: 3
+            },
+            {
+                position: { x: 3, y: 9 },
+                direction: false,
+                type: ShipSizeEnum.Large,
+                length: 3
+            },
+            {
+                position: { x: 1, y: 6 },
+                direction: false,
+                type: ShipSizeEnum.Medium,
+                length: 2
+            },
+            {
+                position: { x: 4, y: 6 },
+                direction: false,
+                type: ShipSizeEnum.Medium,
+                length: 2
+            },
+            {
+                position: { x: 4, y: 0 },
+                direction: false,
+                type: ShipSizeEnum.Medium,
+                length: 2
+            },
+            {
+                position: { x: 1, y: 8 },
+                direction: true,
+                type: ShipSizeEnum.Small,
+                length: 1
+            },
+            {
+                position: { x: 5, y: 3 },
+                direction: true,
+                type: ShipSizeEnum.Small,
+                length: 1
+            },
+            {
+                position: { x: 8, y: 8 },
+                direction: false,
+                type: ShipSizeEnum.Small,
+                length: 1
+            },
+            {
+                position: { x: 0, y: 2 },
+                direction: false,
+                type: ShipSizeEnum.Small,
+                length: 1
+            }
+        ]
+
     }
 }
