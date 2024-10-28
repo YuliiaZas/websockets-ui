@@ -10,6 +10,7 @@ export const WsClientMessageTypes = {
 export const WsServerMessageTypes = {
   reg: 'reg',
   create_game: 'create_game',
+  start_game: 'start_game',
   update_room: 'update_room',
   update_winners: 'update_winners',
   turn: 'turn',

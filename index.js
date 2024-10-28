@@ -10,6 +10,7 @@ import { regPlayer } from './src/controllers/reg-player.js';
 import { addPlayerToRoom } from './src/controllers/add-player-to-room.js';
 import { createGame } from './src/controllers/create-game.js';
 import { updateWinners } from './src/controllers/update-winners.js';
+import { addShips } from './src/controllers/add-ship.js';
 
 const HTTP_PORT = getPort();
 
@@ -18,11 +19,12 @@ httpServer.listen(HTTP_PORT);
 
 export const wss = new WebSocketServer({ server: httpServer });
 
-const clients = new Map(); 
+const clients = new Map();
 
 wss.on('connection', ws => {
   const clientId = randomUUID();
   ws.id = clientId;
+  clients.set(clientId, ws);
   console.log(`A new client with id ${clientId} connected!`);
 
   ws.on('message', message =>  {
@@ -50,7 +52,8 @@ wss.on('connection', ws => {
 
       case WsClientMessageTypes.add_ships:
         console.log("add_shipsData", data);
-      
+        const { gameId, indexPlayer, ships } = JSON.parse(data);
+        addShips(gameId, indexPlayer, ships, clients)
         break;
 
       case WsClientMessageTypes.attack:
