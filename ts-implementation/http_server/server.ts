@@ -1,4 +1,4 @@
-import { WebSocketServer, WebSocket } from "ws";
+import { WebSocketServer, WebSocket as WsWebSocket } from 'ws';
 import dotenv from 'dotenv';
 import { handleRequest } from './game/handleGameLogic';
 
@@ -7,11 +7,12 @@ const PORT = process.env.PORT || 8081;
 
 const server = new WebSocketServer({port: Number(PORT)})
 
-server.on('connection', (ws:WebSocket) => {
+server.on('connection', (ws:WsWebSocket) => {
     console.log("User connected");
 
     ws.on('message', (message: string) => {
         const request = JSON.parse(message);
+        console.log('message received');
         handleRequest(ws, request, server);
     });
 
