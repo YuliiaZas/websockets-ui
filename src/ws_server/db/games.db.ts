@@ -146,7 +146,8 @@ export class GamesDb {
                     } else {
                         return {
                             ...player,
-                            shipsStatus: enemyShips
+                            shipsStatus: enemyShips,
+                            attackStory: player.attackStory ? [...player.attackStory, `${x}${y}`] : []
                         }
                     }
                 })
@@ -166,6 +167,26 @@ export class GamesDb {
             attackResult: result!,
             nextAttackPlayerId: result == AttackStatusEnum.Miss ? indexPlayer! : enemyPlayerId!,
             isGameFinish: !isThereShipToAttack
+        }
+    }
+
+    getRandomPositionForAttack(gameId: number | string, indexPlayer: number | string): { x: number, y: number } {
+        let currentGame = this.games.find(game => game.idGame === gameId)
+
+        //TODO change  let enemyShips = currentGame?.players.find(player => player.playerId != indexPlayer)?.shipsStatus
+        let enemyAttackStory = currentGame?.players.find(player => player.playerId == indexPlayer)?.attackStory ?? []
+
+        let randomAttack
+        do {
+            const x = Math.floor(Math.random()*10)
+            const y = Math.floor(Math.random()*10)
+
+            randomAttack = `${x}${y}`
+        } while(enemyAttackStory.includes(randomAttack))
+
+        return {
+            x: +randomAttack.slice(0, 1),
+            y: +randomAttack.slice(1),
         }
     }
 }

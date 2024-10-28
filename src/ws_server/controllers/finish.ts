@@ -5,10 +5,12 @@ import {MessageTypeEnum} from "../enums/MessageTypeEnum";
 import {updateWinners} from "./updateWinners";
 import {WinnersDb} from "../db/winners.db";
 import {UsersDb} from "../db/users.db";
+import {RoomsDb} from "../db/rooms.db";
 
 const gamesDb = GamesDb.getInstance()
 const winnersDb = WinnersDb.getInstance()
 const usersDb = UsersDb.getInstance()
+const rooms = RoomsDb.getInstance()
 
 export const finish = (winPlayer: number | string, gameId: number | string) => {
 
@@ -32,6 +34,9 @@ export const finish = (winPlayer: number | string, gameId: number | string) => {
 
     // Delete game
     gamesDb.deleteGame(gameId)
+
+    // delete room
+    rooms.deleteRoom(playerOne!.index, playerTwo!.index)
 
     playerOneConnection.send(message)
     playerTwoConnection.send(message)
