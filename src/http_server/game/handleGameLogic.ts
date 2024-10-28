@@ -1,20 +1,22 @@
 import { WebSocketServer } from "ws";
-import { players, rooms, games } from '../db.ts'
+import { players, rooms, games, wsToPlayer } from '../db.ts'
 import { uid4 as uid } from 'uuid';
+
+
 
 const handleRequest = (ws: WebSocket, request: any, server: WebSocketServer) => {
     console.log('handle');
     switch (request.type) {
-        case 'register':
-            handleRegistration(ws, request);
+        case 'reg':
+            handleRegistration(ws, request, server);
             break;
-        case 'create_game':
-            handleCreateRoom(ws, request);
+        case 'create_room':
+            handleCreateRoom(ws, request, server);
             break;
-        case 'join_game':
+        case 'add_user_to_room':
             handleJoinRoom(ws, request, server);
             break;
-        case 'start_game':
+        case 'add_ships':
             handleAddShips(ws, request);
             break;
         case 'attack':
@@ -55,6 +57,7 @@ function handleRegistration(ws: WebSocket, request: any, server: WebSocketServer
         // Register new player
         const id = uid();
         players.set(name, { id, username: name, password, wins: 0 });
+        wsToPlayer.set(ws, id);
         ws.send(JSON.stringify({
             type: 'reg',
             data: { name, index: id, error: false, errorText: '' },
@@ -90,7 +93,18 @@ function handleRegistration(ws: WebSocket, request: any, server: WebSocketServer
 
 
 function handleCreateRoom(ws: WebSocket, request: any, server: WebSocketServer) {
-    const playerId = request.data.playerId;
+    const playerId = wsToPlayer.get(ws);
+
+    if (!playerId) {
+        console.error(`Player ID not found.`);
+        ws.send(JSON.stringify({
+            type: 'error',
+            data: { message: 'PlayerID not found.' },
+            id: 0
+        }));
+        return;
+    }
+
     const roomId = uid();
     const player = players.get(playerId);
 
@@ -103,6 +117,7 @@ function handleCreateRoom(ws: WebSocket, request: any, server: WebSocketServer) 
         }));
         return;
     }
+    
     rooms.set(roomId, { id: roomId, players: [player], gameId: null });
 
     const updateRoomData = Array.from(rooms.values())
@@ -124,7 +139,6 @@ function handleCreateRoom(ws: WebSocket, request: any, server: WebSocketServer) 
 }
 
 function handleJoinRoom(ws: WebSocket, request: any, server: WebSocketServer) {
-    const playerId = request.data.playerId;
     const roomId = request.data.indexRoom;
     const room = rooms.get(roomId);
 
@@ -132,6 +146,18 @@ function handleJoinRoom(ws: WebSocket, request: any, server: WebSocketServer) {
         ws.send(JSON.stringify({
             type: 'error',
             data: { message: 'Room not found.' },
+            id: 0
+        }));
+        return;
+    }
+
+    const playerId = wsToPlayer.get(ws);
+
+    if (!playerId) {
+        console.error(`Player ID not found.`);
+        ws.send(JSON.stringify({
+            type: 'error',
+            data: { message: 'PlayerID not found.' },
             id: 0
         }));
         return;
@@ -147,6 +173,7 @@ function handleJoinRoom(ws: WebSocket, request: any, server: WebSocketServer) {
         return;
     }
 
+
     if (room.players.length >= 2) {
         ws.send(JSON.stringify({
             type: 'error',
@@ -159,7 +186,7 @@ function handleJoinRoom(ws: WebSocket, request: any, server: WebSocketServer) {
     room.players.push(player);
     const gameId = uid();
     room.gameId = gameId;
-    games.set(gameId, { id: gameId, players: {}, currentPlayer: playerId });
+    games.set(gameId, { id: gameId, players: {[room.players[0].id]:{ ships: [], shots:[]}, playerId:{ ships: [], shots:[]}}, currentPlayer: playerId });
     room.players.forEach((roomPlayer) => {
         const response = JSON.stringify({
             type: 'create_game',
@@ -170,8 +197,8 @@ function handleJoinRoom(ws: WebSocket, request: any, server: WebSocketServer) {
             id: 0
         });
 
-        const playerSocket = server.clients[roomPlayer.id];
-        if (playerSocket) {
+        const playerSocket = Array.from(wsToPlayer.entries()).find(([socket, id]) => id === roomPlayer.id)?.[0];
+        if (playerSocket && playerSocket.readyState === WebSocket.OPEN) {
             playerSocket.send(response);
         }
     });
@@ -192,7 +219,7 @@ function handleJoinRoom(ws: WebSocket, request: any, server: WebSocketServer) {
     }));
 }
 
-function handleStartGame(ws: WebSocket, request: any) {
+function handleAddShips(ws: WebSocket, request: any) {
     // Initialize the game state and notify both players
 }
 

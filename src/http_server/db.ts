@@ -38,3 +38,4 @@ interface Coordinate {
 export const players: Map<string, Player> = new Map();
 export const rooms: Map<string, Room> = new Map();
 export const games: Map<string, Game> = new Map();
+export const wsToPlayer: Map<WebSocket, string> = new Map();
