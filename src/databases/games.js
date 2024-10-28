@@ -36,11 +36,16 @@ const populateGrid = playerShips => {
   return grid;
 };
 
-export const addShipsToGame = (gameId, playerId, playerShips) => {
+const getGameById = gameId => {
   const game = games.get(gameId);
   if (!game) {
     throw new Error(`Game with id ${gameId} does not exist.`);
   }
+  return game;
+}
+
+export const addShipsToGame = (gameId, playerId, playerShips) => {
+  const game = getGameById(gameId);
   if (!game.ships.has(playerId)) {
     game.ships.set(playerId, playerShips);
     const grid = populateGrid(playerShips);
@@ -51,27 +56,14 @@ export const addShipsToGame = (gameId, playerId, playerShips) => {
 }
 
 export const isGameReadyToStart = gameId => {
-  const game = games.get(gameId);
-  if (!game) {
-    throw new Error(`Game with id ${gameId} does not exist.`);
-  }
+  const game = getGameById(gameId);
   return game.ships.size === 2
 }
 
-export const getShipsByPlayers = gameId => {
-  const game = games.get(gameId);
-  if (!game) {
-    throw new Error(`Game with id ${gameId} does not exist.`);
-  }
-  return game.ships
-}
+export const getShipsByPlayers = gameId => getGameById(gameId).ships;
 
 export const getAttackStatus = (gameId, playerId, x, y) => {
-  const game = games.get(gameId);
-  if (!game) {
-    throw new Error(`Game with id ${gameId} does not exist.`);
-  }
-
+  const game = getGameById(gameId);
   const enemyId = [...game.grids.keys()].find(id => id !== playerId);
   const cell = game.grids.get(enemyId)[y][x];
   cell.attacked = true;
@@ -79,11 +71,12 @@ export const getAttackStatus = (gameId, playerId, x, y) => {
 }
 
 export const getEnemyId = (gameId, playerId) => {
-  const game = games.get(gameId);
-  if (!game) {
-    throw new Error(`Game with id ${gameId} does not exist.`);
-  }
-
+  const game = getGameById(gameId);
   return [...game.grids.keys()].find(id => id !== playerId);
+}
 
+export const getEnemyGrid = (gameId, playerId) => {
+  const game = getGameById(gameId);
+  const enemyId = [...game.grids.keys()].find(id => id !== playerId);
+  return game.grids.get(enemyId);
 }

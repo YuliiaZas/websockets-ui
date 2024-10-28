@@ -12,6 +12,7 @@ import { createGame } from './src/controllers/create-game.js';
 import { updateWinners } from './src/controllers/update-winners.js';
 import { addShips } from './src/controllers/add-ship.js';
 import { doAttack } from './src/controllers/do-attack.js';
+import { doRandomAttack } from './src/controllers/do-random-attack.js';
 
 const HTTP_PORT = getPort();
 
@@ -54,7 +55,6 @@ wss.on('connection', ws => {
       case WsClientMessageTypes.add_ships:
         console.log("add_shipsData", data);
         const { gameId, indexPlayer, ships } = JSON.parse(data);
-
         addShips(gameId, indexPlayer, ships, clients)
         break;
 
@@ -63,6 +63,7 @@ wss.on('connection', ws => {
         break;
 
       case WsClientMessageTypes.randomAttack:
+        doRandomAttack(data, clients);
         break;
 
       // default:
