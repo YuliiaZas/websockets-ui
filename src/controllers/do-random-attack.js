@@ -11,10 +11,10 @@ const getRandomAttackPosition = grid => {
   return { x, y };
 }
 
-export const doRandomAttack = (data, clients) => {
+export const doRandomAttack = (data, clients, wss) => {
   const { gameId, indexPlayer } = JSON.parse(data);
   const grid = getEnemyGrid(gameId, indexPlayer);
   const {x, y} = getRandomAttackPosition(grid);
 
-  doAttack(JSON.stringify({gameId, indexPlayer, x, y}), clients)
+  doAttack(JSON.stringify({gameId, indexPlayer, x, y}), clients, wss)
 }

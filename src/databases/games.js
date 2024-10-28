@@ -80,3 +80,20 @@ export const getEnemyGrid = (gameId, playerId) => {
   const enemyId = [...game.grids.keys()].find(id => id !== playerId);
   return game.grids.get(enemyId);
 }
+
+export const isAllEnemyShipsKilled = (gameId, playerId) => {
+  const game = getGameById(gameId);
+  const enemyId = [...game.grids.keys()].find(id => id !== playerId);
+  const enemyGrid = game.grids.get(enemyId);
+  let killCount = 0;
+
+  for (let row of enemyGrid) {
+    for (let cell of row) {
+      if (cell.type && cell.attacked) {
+        killCount += 1;
+      }
+    }
+  }
+
+  return killCount === 20;
+}

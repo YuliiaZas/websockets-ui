@@ -59,11 +59,11 @@ wss.on('connection', ws => {
         break;
 
       case WsClientMessageTypes.attack:
-        doAttack(data, clients);
+        doAttack(data, clients, wss);
         break;
 
       case WsClientMessageTypes.randomAttack:
-        doRandomAttack(data, clients);
+        doRandomAttack(data, clients, wss);
         break;
 
       // default:
