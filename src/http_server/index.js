@@ -7,6 +7,7 @@ const __dirname = path.resolve(path.dirname(''));
 
 const rooms = new Map();
 const players = new Map();
+const games = new Map();
 let roomIdCounter = 1;
 
 export const httpServer = http.createServer(function (req, res) {
@@ -38,7 +39,7 @@ wss.on('connection', (ws) => {
             const request = JSON.parse(messageString);
             handleRequest(ws, request);
         } catch (error) {
-            console.error("Ошибка:", error.message);
+            console.error("Ошибка:", error.message, error);
             ws.send(JSON.stringify({ error: 'Invalid message format' }));
         }
     });
@@ -60,16 +61,15 @@ function handleRequest(ws, request) {
             registerPlayer(ws, request.data);
             break;
         case 'create_room':
-            const id = generateUniqueID();
-            player = { ws, name: `Player_${id}`, index: id };
-            players.set(ws, player);
-            createRoom(ws, player);
+            createRoom(ws);
             updateRooms();
             break;
         case "add_user_to_room":
-            player = players.get(ws);
-            addUserToRoom(ws, player, request.data.indexRoom);
+            addUserToRoom(ws, request.data.indexRoom);
             updateRooms();
+            break;
+        case "add_ships":
+            addShipsToGame(ws, request.data);
             break;
         default:
             ws.send(JSON.stringify({ error: 'Unknown request type' }));
@@ -94,7 +94,23 @@ function registerPlayer(ws, { name, password }) {
     }
 }
 
-function createRoom(ws, player) {
+function createPlayer(ws) {
+    let player = players.get(ws);
+
+    if (player) {
+        return player;
+    }
+
+    const id = generateUniqueID();
+    player = { ws, name: `Player_${id}`, index: id };
+    players.set(ws, player);
+
+    return player;
+
+}
+
+function createRoom(ws) {
+    const player = createPlayer(ws);
     const roomId = roomIdCounter++;
     rooms.set(roomId, [player]);
     ws.send(JSON.stringify({
@@ -110,7 +126,8 @@ function createRoom(ws, player) {
     }));
 }
 
-function addUserToRoom(ws, player, indexRoom) {
+function addUserToRoom(ws, indexRoom) {
+    const player = createPlayer(ws);
     const room = rooms.get(indexRoom);
     if (room && room.length === 1) {
 
@@ -120,9 +137,10 @@ function addUserToRoom(ws, player, indexRoom) {
         }
 
         room.push(player);
+        const idGame = createGame(room);
 
-        const idGame = generateUniqueID();
-        room.forEach((user, index) => {
+        room.forEach((user) => {
+            console.log(user);
             user.ws.send(JSON.stringify({
                 type: "create_game",
                 data: JSON.stringify({
@@ -157,6 +175,44 @@ function updateRooms() {
             }));
         }
     });
+}
+
+function addShipsToGame(ws, { gameId, ships, indexPlayer }) {
+    const game = games.get(gameId);
+    if (!game) {
+        ws.send(JSON.stringify({ error: "Игра не найдена." }));
+        return;
+    }
+
+    game.ships[indexPlayer] = ships;
+
+    if (Object.keys(game.ships).length === 2) {
+        startGame(game);
+    } else {
+        ws.send(JSON.stringify({ message: "Корабли добавлены, ждите другого игрока." }));
+    }
+}
+
+function startGame(game) {
+    game.players.forEach(player => {
+        player.ws.send(JSON.stringify({
+            type: "start_game",
+            data: JSON.stringify({
+                ships: game.ships[player.index],
+                currentPlayerIndex: player.index
+            }),
+            id: 0,
+        }));
+    });
+}
+
+function createGame(players) {
+    const gameId = generateUniqueID();
+    games.set(gameId, {
+        players: players,
+        ships: {},
+    });
+    return gameId;
 }
 
 process.on('SIGINT', () => {
