@@ -45,6 +45,8 @@ wss.on('connection', (ws) => {
 
     ws.on('close', () => {
         console.log("Player disconnected");
+        players.delete(ws);
+        updateRooms();
     });
 });
 
@@ -111,20 +113,21 @@ function createRoom(ws, player) {
 function addUserToRoom(ws, player, indexRoom) {
     const room = rooms.get(indexRoom);
     if (room && room.length === 1) {
+
+        if (room.some(existingPlayer => existingPlayer.ws === ws)) {
+            ws.send(JSON.stringify({ error: "Вы уже находитесь в этой комнате." }));
+            return;
+        }
+
         room.push(player);
 
-        rooms.delete(indexRoom);
-
         const idGame = generateUniqueID();
-        const idPlayer1 = generateUniqueID();
-        const idPlayer2 = generateUniqueID();
-
         room.forEach((user, index) => {
             user.ws.send(JSON.stringify({
                 type: "create_game",
                 data: JSON.stringify({
                     idGame,
-                    idPlayer: index === 0 ? idPlayer1 : idPlayer2
+                    idPlayer: user.index
                 }),
                 id: 0
             }));
@@ -165,4 +168,3 @@ process.on('SIGINT', () => {
     });
 });
 
-// I'll continue...
