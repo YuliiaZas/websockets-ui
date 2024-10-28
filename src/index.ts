@@ -1,18 +1,18 @@
 import { WebSocket, WebSocketServer } from 'ws';
-import { getPort } from "./src/helpers/env.ts";
-import { httpServer } from "./src/http_server/index.ts";
-import { WsClientMessageTypes } from './src/const/ws-message-types.ts';
-import { updateRoom } from './src/controllers/update-room.ts';
-import { createRoomAndAddPlayerToRoom } from './src/controllers/create-room-and-add-player.ts';
-import { regPlayer } from './src/controllers/reg-player.ts';
-import { addPlayerToRoom } from './src/controllers/add-player-to-room.ts';
-import { createGame } from './src/controllers/create-game.ts';
-import { updateWinners } from './src/controllers/update-winners.ts';
-import { addShips } from './src/controllers/add-ship.ts';
-import { doAttack } from './src/controllers/do-attack.ts';
-import { doRandomAttack } from './src/controllers/do-random-attack.ts';
-import { WebSocketClients } from './src/types/ws-clients.ts';
-import { setWsClient } from './src/helpers/set.ts';
+import { getPort } from "./helpers/env.ts";
+import { httpServer } from "./http_server/index.ts";
+import { WsClientMessageTypes } from './const/ws-message-types.ts';
+import { updateRoom } from './controllers/update-room.ts';
+import { createRoomAndAddPlayerToRoom } from './controllers/create-room-and-add-player.ts';
+import { regPlayer } from './controllers/reg-player.ts';
+import { addPlayerToRoom } from './controllers/add-player-to-room.ts';
+import { createGame } from './controllers/create-game.ts';
+import { updateWinners } from './controllers/update-winners.ts';
+import { addShips } from './controllers/add-ship.ts';
+import { doAttack } from './controllers/do-attack.ts';
+import { doRandomAttack } from './controllers/do-random-attack.ts';
+import { WebSocketClients } from './types/ws-clients.ts';
+import { setWsClient } from './helpers/set.ts';
 
 const HTTP_PORT = getPort();
 
