@@ -83,20 +83,31 @@ export class GamesDb {
         });
     }
 
-    checkAttackResults(data: AttackType): { attackResult: AttackStatusEnum, nextAttackPlayerId: number | string, isGameFinish: boolean  } {
+    checkAttackResults(data: AttackType): { attackResult: AttackStatusEnum | '', nextAttackPlayerId: number | string, isGameFinish: boolean  } {
         const { gameId, indexPlayer, x, y } = data
         let currentGame = this.games.find(game => game.idGame === gameId)
-        //TODO change  enemyPlayerId = currentGame?.players.find(player => player.playerId != indexPlayer).playerId
-        const enemyPlayerId = currentGame?.players.find(player => player.playerId == indexPlayer)?.playerId
 
-        //TODO change  let enemyShipsStart = currentGame?.players.find(player => player.playerId != indexPlayer)?.ships
-        let enemyShipsStart = currentGame?.players.find(player => player.playerId == indexPlayer)?.ships
+        const TEST_MODE = currentGame?.players.map(player => player.index)[0] == currentGame?.players.map(player => player.index)[1]
 
-        //TODO change  let enemyShips = currentGame?.players.find(player => player.playerId != indexPlayer)?.shipsStatus
-        let enemyShips = currentGame?.players.find(player => player.playerId == indexPlayer)?.shipsStatus
+        const enemyPlayer = TEST_MODE ?
+            currentGame?.players.find(player => player.playerId == indexPlayer) :
+            currentGame?.players.find(player => player.playerId != indexPlayer)
+
+        const enemyPlayerId = enemyPlayer?.playerId
+
+        let enemyShipsStart = TEST_MODE ?
+            currentGame?.players.find(player => player.playerId == indexPlayer)?.ships :
+            currentGame?.players.find(player => player.playerId != indexPlayer)?.ships
+
+        let enemyShips = TEST_MODE ?
+            currentGame?.players.find(player => player.playerId == indexPlayer)?.shipsStatus :
+            currentGame?.players.find(player => player.playerId != indexPlayer)?.shipsStatus
 
 
-        let result = AttackStatusEnum.Miss
+        let result: AttackStatusEnum | '' = AttackStatusEnum.Miss
+
+        const attackXY = `${x}${y}`
+        const wasTheSamePositionAttackedAgain = (enemyPlayer?.attackStory ?? []).includes(attackXY)
 
         // check each ship and update length if ship was attacked
         enemyShips = enemyShips!.map((ship, index) => {
@@ -113,16 +124,16 @@ export class GamesDb {
                 }
             }
 
-            const attackXY = `${x}${y}`
-
             if (shipPositions.includes(attackXY)) {
-                const hasShipLengthAfterAttack = ship.length  > 1
+                const hasShipLengthAfterAttack = wasTheSamePositionAttackedAgain ?
+                    !!ship.length :
+                    ship.length  > 1
 
                 if (hasShipLengthAfterAttack) {
                     result = AttackStatusEnum.Shot
                     return {
                         ...ship,
-                        length: ship.length - 1
+                        length: wasTheSamePositionAttackedAgain ? ship.length : ship.length - 1
                     }
                 } else {
                     result =  AttackStatusEnum.Killed
@@ -140,8 +151,11 @@ export class GamesDb {
         currentGame = {
             idGame: currentGame!.idGame,
             players: currentGame!.players.map(player => {
-                //TODO change on player.playerId == indexPlayer
-                    if (player.playerId != indexPlayer) {
+                const isClientPlayer = TEST_MODE ?
+                    player.playerId != indexPlayer :
+                    player.playerId == indexPlayer
+
+                    if ( isClientPlayer) {
                         return player
                     } else {
                         return {
@@ -173,8 +187,11 @@ export class GamesDb {
     getRandomPositionForAttack(gameId: number | string, indexPlayer: number | string): { x: number, y: number } {
         let currentGame = this.games.find(game => game.idGame === gameId)
 
-        //TODO change  let enemyShips = currentGame?.players.find(player => player.playerId != indexPlayer)?.shipsStatus
-        let enemyAttackStory = currentGame?.players.find(player => player.playerId == indexPlayer)?.attackStory ?? []
+        const TEST_MODE = currentGame?.players.map(player => player.index)[0] == currentGame?.players.map(player => player.index)[1]
+
+        let enemyAttackStory = TEST_MODE ?
+            currentGame?.players.find(player => player.playerId == indexPlayer)?.attackStory ?? [] :
+            currentGame?.players.find(player => player.playerId != indexPlayer)?.attackStory ?? []
 
         let randomAttack
         do {
