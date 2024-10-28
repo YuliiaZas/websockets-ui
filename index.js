@@ -73,12 +73,6 @@ wss.on('connection', ws => {
 });
 
 
-function handleAttack(ws, data) {
-  // Implement attack handling logic
-}
 
-function handleRandomAttack(ws, data) {
-  // Implement random attack handling logic
-}
 
 
