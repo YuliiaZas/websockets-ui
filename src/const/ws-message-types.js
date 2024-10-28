@@ -14,5 +14,6 @@ export const WsServerMessageTypes = {
   update_room: 'update_room',
   update_winners: 'update_winners',
   turn: 'turn',
+  attack: 'attack',
   finish: 'finish'
 }

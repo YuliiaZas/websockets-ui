@@ -17,10 +17,26 @@ export const addShips = (gameId, playerId, playerShips, clients) => {
     })
   }
 
+  const getTurnResponse = firstTurnPlayerId => {
+    return deepStringify({
+      type: WsServerMessageTypes.turn,
+      data: {
+        currentPlayer: firstTurnPlayerId
+      },
+      id: 0,
+    })
+  }
+
   if (isGameReadyToStart(gameId)) {
+    const firstTurnPlayerId = [...getShipsByPlayers(gameId)][0][0];
     getShipsByPlayers(gameId).forEach((ships, playerId) => {
       const startGameRes = getStartGameResponse(playerId, ships)
       clients.get(playerId).send(startGameRes);
+    })
+
+    getShipsByPlayers(gameId).forEach((_, playerId) => {
+      const turnRes = getTurnResponse(firstTurnPlayerId)
+      clients.get(playerId).send(turnRes);
     })
   }
   
