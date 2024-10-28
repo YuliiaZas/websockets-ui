@@ -7,6 +7,7 @@
     "scripts": {
         "start": "node ./index.js",
         "start:dev": "nodemon ./index.js",
+        "start:prod": "nodemon ./index.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "Andrei Auchynnikau",
@@ -16,6 +17,6 @@
         "nodemon": "^2.0.16"
     },
     "dependencies": {
-        "ws": "^8.8.0"
+        "ws": "^8.18.0"
     }
 }
