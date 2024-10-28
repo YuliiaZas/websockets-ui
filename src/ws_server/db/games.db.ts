@@ -55,6 +55,12 @@ export class GamesDb {
         return newGame
     }
 
+    /** Delete game */
+
+    deleteGame (gameId: string | number) {
+        this.games = this.games.filter(game => game.idGame != gameId)
+    }
+
     addShips(idGame: string | number  , ships: ShipInfoType[], playerId: string | number) {
         this.games = this.games.map(game => {
             if (game.idGame == idGame) {
@@ -77,21 +83,29 @@ export class GamesDb {
         });
     }
 
-    checkAttackResults(data: AttackType): AttackStatusEnum {
+    checkAttackResults(data: AttackType): { attackResult: AttackStatusEnum, nextAttackPlayerId: number | string, isGameFinish: boolean  } {
         const { gameId, indexPlayer, x, y } = data
         let currentGame = this.games.find(game => game.idGame === gameId)
+        //TODO change  enemyPlayerId = currentGame?.players.find(player => player.playerId != indexPlayer).playerId
+        const enemyPlayerId = currentGame?.players.find(player => player.playerId == indexPlayer)?.playerId
+
+        //TODO change  let enemyShipsStart = currentGame?.players.find(player => player.playerId != indexPlayer)?.ships
+        let enemyShipsStart = currentGame?.players.find(player => player.playerId == indexPlayer)?.ships
+
         //TODO change  let enemyShips = currentGame?.players.find(player => player.playerId != indexPlayer)?.shipsStatus
         let enemyShips = currentGame?.players.find(player => player.playerId == indexPlayer)?.shipsStatus
 
+
         let result = AttackStatusEnum.Miss
 
-        enemyShips = enemyShips!.map(ship => {
+        // check each ship and update length if ship was attacked
+        enemyShips = enemyShips!.map((ship, index) => {
            let shipPositions = []
 
             let shipY = ship.position.y
             let shipX = ship.position.x
 
-            for (let i = 0; i < ship.length; i++) {
+            for (let i = 0; i < enemyShipsStart![index]!.length; i++) {
                 if (ship.direction) {
                     shipPositions.push(`${shipX}${shipY + i}`)
                 } else {
@@ -146,6 +160,12 @@ export class GamesDb {
             }
         })
 
-        return result!
+        const isThereShipToAttack = enemyShips.filter(ship => ship.length > 0).length
+
+        return {
+            attackResult: result!,
+            nextAttackPlayerId: result == AttackStatusEnum.Miss ? indexPlayer! : enemyPlayerId!,
+            isGameFinish: !isThereShipToAttack
+        }
     }
 }
