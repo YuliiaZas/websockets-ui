@@ -1,12 +1,15 @@
 import type { WebSocket } from 'ws';
 
+import { getWinners } from '../database/winners';
 import { handleRegistration } from '../registration/handleRegistration';
+import { broadcastMessage } from '../utils/broadcastMessag';
 import { Message, MessageTypeEnum } from './../entities/message.type';
+import { WinnersResponse } from '../entities/winners.type';
 
 export function handleMessage(ws: WebSocket, message: Message) {
   switch (message.type) {
     case MessageTypeEnum.REG:
-      handleRegistration(ws, message);
+      handleRegistration(ws, message, broadcastWinners);
       break;
     case MessageTypeEnum.UPDATE_WINNERS:
       ws.send(
@@ -74,3 +77,6 @@ export function handleMessage(ws: WebSocket, message: Message) {
       break;
   }
 }
+
+const broadcastWinners = () =>
+  broadcastMessage<WinnersResponse[]>(MessageTypeEnum.UPDATE_WINNERS, getWinners());
