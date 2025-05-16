@@ -5,10 +5,10 @@
   "main": "index.ts",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp -r front dist/front",
     "start:dev": "tsx watch index.ts",
     "start:prod": "node dist/index.js",
-    "start:build": "npm run build && npm start:prod",
+    "start:build": "npm run build && npm run start:prod",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write ."
