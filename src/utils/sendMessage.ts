@@ -1,37 +1,81 @@
 import { WebSocket } from 'ws';
 
+import { Message, MessageTypeEnum } from '../models/message.type';
+import { Player } from '../models/player.type';
 import { wss } from '../ws_server';
-import { Message } from '../entities/message.type';
 
 export function sendMessage<T>(
-  type: string,
+  type: MessageTypeEnum,
   data: Message<T>['data'],
-  ws: WebSocket | null
+  ws: WebSocket | null,
+  targetPlayerIds?: string[]
 ): void {
+  const payload = createMessagePayload(type, data);
+  sendMessageWithPayload(payload, ws, targetPlayerIds);
+}
+
+export function sendMessageWithPayload(
+  payload: Message<string> | null,
+  ws: WebSocket | null,
+  targetPlayerIds?: string[]
+) {
+  if (!payload) {
+    console.error(`Failed to send message: payload is empty`);
+    return;
+  }
+
+  let payloadString: string;
   try {
-    const payload = JSON.stringify({
+    payloadString = JSON.stringify(payload);
+  } catch (err) {
+    console.error(
+      `Failed to send message for command '${payload.type}' with data:`,
+      payload.data,
+      '\nError:',
+      err
+    );
+    return;
+  }
+
+  if (ws) {
+    ws.send(payloadString);
+  } else {
+    for (const client of wss.clients) {
+      if (
+        client.readyState === WebSocket.OPEN &&
+        'player' in client &&
+        client.player &&
+        (!targetPlayerIds ||
+          targetPlayerIds.includes((client.player as Player).index))
+      ) {
+        client.send(payloadString);
+      }
+    }
+  }
+
+  console.log(
+    `Command '${payload.type}' sent successfully to client${ws ? '' : 's'} with data:`,
+    payload.data
+  );
+}
+
+export function createMessagePayload<T>(
+  type: MessageTypeEnum,
+  data: Message<T>['data']
+): Message<string> | null {
+  try {
+    return {
       type,
       data: JSON.stringify(data),
       id: 0,
-    });
-
-    if (ws) {
-      ws.send(payload);
-    } else {
-      for (const client of wss.clients) {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(payload);
-        }
-      }
-    }
-
-    console.log(`Command '${type}' sent successfully with data:`, data);
+    };
   } catch (err) {
     console.error(
-      `Failed to send message for command '${type}' with data`,
+      `Failed stringify data for command '${type}' with data:`,
       data,
       '\nError:',
       err
     );
+    return null;
   }
 }

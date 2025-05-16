@@ -1,4 +1,5 @@
-import { RegistrationRequest } from '../entities/registration.type';
+import { AddUserToRoomRequest } from '../models/requests/addUserToRoom.type';
+import { RegistrationRequest } from '../models/requests/registration.type';
 
 export function isRegistrationRequest(
   data: unknown
@@ -13,13 +14,14 @@ export function isRegistrationRequest(
   );
 }
 
-// export function isPlayer(data: unknown): data is Player {
-//   return (
-//     typeof data === 'object' &&
-//     data !== null &&
-//     'index' in data &&
-//     'name' in data &&
-//     'password' in data &&
-//     'wins' in data
-//   );
-// }
+export function isCreateRoomRequest(
+  data: unknown
+): data is AddUserToRoomRequest {
+  console.log('isCreateRoomRequest', data);
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'indexRoom' in data &&
+    typeof (data as AddUserToRoomRequest).indexRoom === 'string'
+  );
+}

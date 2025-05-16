@@ -1,6 +1,6 @@
 import { WebSocketServer } from 'ws';
 
-import { Message } from '../entities/message.type';
+import { Message } from '../models/message.type';
 import { handleMessage } from './handleMessage';
 
 const WS_PORT = 3000;

@@ -1,6 +1,10 @@
-import { Message } from '../entities/message.type';
+import { Message, MessageTypeEnum } from '../models/message.type';
 import { sendMessage } from './sendMessage';
 
-export function broadcastMessage<T>(type: string, data: Message<T>['data']) {
-  sendMessage(type, data, null);
+export function broadcastMessage<T>(
+  type: MessageTypeEnum,
+  data: Message<T>['data'],
+  targetPlayerIds?: string[]
+): void {
+  sendMessage(type, data, null, targetPlayerIds);
 }

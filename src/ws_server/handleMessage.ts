@@ -1,46 +1,55 @@
 import type { WebSocket } from 'ws';
 
+import { handleGameCreation } from '../commands/handleGameCreation';
+import { handleRegistration } from '../commands/handleRegistration';
+import { handleRoomCreation } from '../commands/handleRoomCreation';
+import { handleUserAddingToRoom } from '../commands/handleUserAddingToRoom';
+import { getRooms, MAX_ROOM_PLAYERS } from '../database/rooms';
 import { getWinners } from '../database/winners';
-import { handleRegistration } from '../registration/handleRegistration';
+import { Message, MessageTypeEnum } from '../models/message.type';
+import { AddUserToRoomRequest } from '../models/requests/addUserToRoom.type';
+import { Room } from '../models/room.type';
+import { Winner } from '../models/winner.type';
 import { broadcastMessage } from '../utils/broadcastMessag';
-import { Message, MessageTypeEnum } from './../entities/message.type';
-import { WinnersResponse } from '../entities/winners.type';
+import {
+  createMessagePayload,
+  sendMessageWithPayload,
+} from '../utils/sendMessage';
 
 export function handleMessage(ws: WebSocket, message: Message) {
   switch (message.type) {
     case MessageTypeEnum.REG:
-      handleRegistration(ws, message, broadcastWinners);
-      break;
-    case MessageTypeEnum.UPDATE_WINNERS:
-      ws.send(
-        JSON.stringify({
-          type: 'update_winners',
-          data: { winners: message.data },
-        })
-      );
+      const onRegistrationSuccess = () => {
+        broadcastRooms();
+        broadcastWinners();
+      };
+
+      handleRegistration(ws, message, onRegistrationSuccess);
       break;
     case MessageTypeEnum.CREATE_ROOM:
-      ws.send(
-        JSON.stringify({ type: 'create_room', data: { roomId: message.data } })
-      );
+      const onRoomCreated = (room: Room) => {
+        const addUserToRoomPayload = createMessagePayload<AddUserToRoomRequest>(
+          MessageTypeEnum.ADD_USER_TO_ROOM,
+          { indexRoom: room.roomId }
+        );
+
+        if (addUserToRoomPayload) {
+          handleUserAddingToRoom(ws, addUserToRoomPayload, broadcastRooms);
+          sendMessageWithPayload(addUserToRoomPayload, ws);
+        }
+      };
+
+      handleRoomCreation(message, onRoomCreated);
       break;
     case MessageTypeEnum.ADD_USER_TO_ROOM:
-      ws.send(
-        JSON.stringify({
-          type: 'add_user_to_room',
-          data: { roomId: message.data },
-        })
-      );
-      break;
-    case MessageTypeEnum.CREATE_GAME:
-      ws.send(
-        JSON.stringify({ type: 'create_game', data: { gameId: message.data } })
-      );
-      break;
-    case MessageTypeEnum.UPDATE_ROOM:
-      ws.send(
-        JSON.stringify({ type: 'update_room', data: { roomId: message.data } })
-      );
+      const onUserAddedToRoom = (room: Room) => {
+        if (room.roomUsers.length === MAX_ROOM_PLAYERS) {
+          handleGameCreation(ws, room);
+        }
+        broadcastRooms();
+      };
+
+      handleUserAddingToRoom(ws, message, onUserAddedToRoom);
       break;
     case MessageTypeEnum.ADD_SHIPS:
       ws.send(
@@ -79,4 +88,7 @@ export function handleMessage(ws: WebSocket, message: Message) {
 }
 
 const broadcastWinners = () =>
-  broadcastMessage<WinnersResponse[]>(MessageTypeEnum.UPDATE_WINNERS, getWinners());
+  broadcastMessage<Winner[]>(MessageTypeEnum.UPDATE_WINNERS, getWinners());
+
+const broadcastRooms = () =>
+  broadcastMessage<Room[]>(MessageTypeEnum.UPDATE_ROOM, getRooms());

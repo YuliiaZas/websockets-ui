@@ -1,10 +1,10 @@
 import type { WebSocket } from 'ws';
 
-import { createPlayer, players, savePlayer } from '../database/players';
-import { updateWinners } from '../database/winners';
-import { Message, MessageTypeEnum } from '../entities/message.type';
-import { RegistrationResponse } from '../entities/registration.type';
-import { Player } from '../models/player';
+import { createPlayer, getPlayer, players } from '../database/players';
+import { Message, MessageTypeEnum } from '../models/message.type';
+import { Player } from '../models/player.type';
+import { RegistrationResponse } from '../models/requests/registration.type';
+import { getDataFromMessage } from '../utils/getDataFromMessage';
 import { sendMessage } from '../utils/sendMessage';
 import { isRegistrationRequest } from '../utils/validation';
 
@@ -18,21 +18,22 @@ const registrationData: RegistrationResponse = {
 export function handleRegistration(
   ws: WebSocket,
   message: Message,
-  onSuccess?: () => void
+  onSuccessCallback?: () => void
 ): void {
   if (message.type !== MessageTypeEnum.REG) return;
   try {
-    const data =
-      typeof message.data === 'string'
-        ? JSON.parse(message.data)
-        : message.data;
-
-    const registrationResponse = getRegistrationData(data);
+    const registrationResponse = getRegistrationData(
+      getDataFromMessage(message)
+    );
 
     sendMessage<RegistrationResponse>(message.type, registrationResponse, ws);
 
-    if (!registrationResponse.error && onSuccess) {
-      onSuccess();
+    if (!registrationResponse.error) {
+      ws.player = getPlayer(registrationResponse.name);
+    }
+
+    if (!registrationResponse.error && onSuccessCallback) {
+      onSuccessCallback();
     }
   } catch (error) {
     sendMessage<RegistrationResponse>(
@@ -96,8 +97,6 @@ function registerOrLoginPlayer(
   }
 
   const newPlayer = createPlayer(name, password);
-  savePlayer(newPlayer);
-  updateWinners(newPlayer);
 
   return { player: newPlayer, error: null };
 }
