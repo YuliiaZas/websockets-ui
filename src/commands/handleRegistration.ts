@@ -1,6 +1,6 @@
 import type { WebSocket } from 'ws';
 
-import { createPlayer, getPlayer, players } from '../database/players';
+import { createPlayer, getPlayer, getPlayerByName } from '../database/players';
 import { Message, MessageTypeEnum } from '../models/message.type';
 import { Player } from '../models/player.type';
 import { RegistrationResponse } from '../models/requests/registration.type';
@@ -29,7 +29,7 @@ export function handleRegistration(
     sendMessage<RegistrationResponse>(message.type, registrationResponse, ws);
 
     if (!registrationResponse.error) {
-      ws.player = getPlayer(registrationResponse.name);
+      ws.player = getPlayer(registrationResponse.index);
     }
 
     if (!registrationResponse.error && onSuccessCallback) {
@@ -87,7 +87,7 @@ function registerOrLoginPlayer(
   name: string,
   password: string
 ): { player: Player | null; error: string | null } {
-  const existingPlayer = players.get(name);
+  const existingPlayer = getPlayerByName(name);
 
   if (existingPlayer) {
     if (existingPlayer.password !== password) {

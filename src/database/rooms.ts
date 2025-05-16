@@ -58,3 +58,36 @@ export const getRooms = (): Room[] => {
 export const getRoom = (roomId: string): Room | undefined => {
   return rooms.get(roomId);
 };
+
+export const getRoomsIdsByPlayerId = (playerId: string): string[] => {
+  const playerRoomsIds: string[] = [];
+  for (const room of rooms.values()) {
+    if (room.roomUsers.some((user) => user.index === playerId)) {
+      playerRoomsIds.push(room.roomId);
+    }
+  }
+  return playerRoomsIds;
+};
+
+export const removePlayerFromRoom = (
+  roomId: string,
+  playerId: string
+): Room => {
+  const room = rooms.get(roomId);
+
+  if (!room) {
+    throw new Error(`Room with ID ${roomId} not found`);
+  }
+
+  const updatedRoom = {
+    ...room,
+    roomUsers: room.roomUsers.filter((user) => user.index !== playerId),
+  };
+
+  rooms.set(room.roomId, updatedRoom);
+  return updatedRoom;
+};
+
+export const isRoomFull = (room: Room): boolean => {
+  return room.roomUsers.length >= MAX_ROOM_PLAYERS;
+};

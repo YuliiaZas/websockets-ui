@@ -4,7 +4,7 @@ import { handleGameCreation } from '../commands/handleGameCreation';
 import { handleRegistration } from '../commands/handleRegistration';
 import { handleRoomCreation } from '../commands/handleRoomCreation';
 import { handleUserAddingToRoom } from '../commands/handleUserAddingToRoom';
-import { getRooms, MAX_ROOM_PLAYERS } from '../database/rooms';
+import { getRooms, isRoomFull } from '../database/rooms';
 import { getWinners } from '../database/winners';
 import { Message, MessageTypeEnum } from '../models/message.type';
 import { AddUserToRoomRequest } from '../models/requests/addUserToRoom.type';
@@ -43,7 +43,7 @@ export function handleMessage(ws: WebSocket, message: Message) {
       break;
     case MessageTypeEnum.ADD_USER_TO_ROOM:
       const onUserAddedToRoom = (room: Room) => {
-        if (room.roomUsers.length === MAX_ROOM_PLAYERS) {
+        if (isRoomFull(room)) {
           handleGameCreation(ws, room);
         }
         broadcastRooms();

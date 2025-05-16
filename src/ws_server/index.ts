@@ -7,17 +7,13 @@ const WS_PORT = 3000;
 export const wss = new WebSocketServer({ port: WS_PORT });
 
 wss.on('connection', (ws) => {
-  console.log('New WebSocket connection');
-
-  ws.on('message', (data, isBinary) => {
-    console.log('Received data:', data, isBinary);
+  ws.on('message', (data) => {
     let message: Message;
     try {
       message = JSON.parse(data.toString());
     } catch (err) {
       return console.error('Invalid JSON:', err);
     }
-    console.log('Received command:', message.type);
 
     try {
       handleMessage(ws, message);
@@ -29,6 +25,10 @@ wss.on('connection', (ws) => {
   ws.on('close', () => {
     console.log('WebSocket disconnected');
   });
+});
+
+wss.on('error', (error) => {
+  console.error('WebSocket error:', error);
 });
 
 console.log(`WebSocket server started on ws://localhost:${WS_PORT}`);
