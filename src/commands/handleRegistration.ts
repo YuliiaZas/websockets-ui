@@ -1,12 +1,16 @@
 import type { WebSocket } from 'ws';
 
-import { createPlayer, getPlayer, getPlayerByName } from '../database/players';
-import { Message, MessageTypeEnum } from '../models/message.type';
-import { Player } from '../models/player.type';
-import { RegistrationResponse } from '../models/requests/registration.type';
-import { getDataFromMessage } from '../utils/getDataFromMessage';
-import { sendMessage } from '../utils/sendMessage';
-import { isRegistrationRequest } from '../utils/validation';
+import {
+  createPlayer,
+  getPlayer,
+  getPlayerByName,
+} from '../database/players.js';
+import { Message, MessageTypeEnum } from '../models/message.type.js';
+import { Player } from '../models/player.type.js';
+import { RegistrationResponse } from '../models/requests/registration.type.js';
+import { getDataFromMessage } from '../utils/getDataFromMessage.js';
+import { sendMessage } from '../utils/sendMessage.js';
+import { isRegistrationRequest } from '../utils/validation.js';
 
 const registrationData: RegistrationResponse = {
   name: '',

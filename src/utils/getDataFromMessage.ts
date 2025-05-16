@@ -1,4 +1,4 @@
-import { Message } from '../models/message.type';
+import { Message } from '../models/message.type.js';
 
 export function getDataFromMessage(message: Message): unknown {
   if (!message || typeof message !== 'object' || !('data' in message)) {

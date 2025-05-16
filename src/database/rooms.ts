@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 
-import { Player } from '../models/player.type';
-import { Room } from '../models/room.type';
+import { Player } from '../models/player.type.js';
+import { Room } from '../models/room.type.js';
 
 export const MAX_ROOM_PLAYERS = 2;
 

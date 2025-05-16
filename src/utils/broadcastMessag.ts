@@ -1,5 +1,5 @@
-import { Message, MessageTypeEnum } from '../models/message.type';
-import { sendMessage } from './sendMessage';
+import { Message, MessageTypeEnum } from '../models/message.type.js';
+import { sendMessage } from './sendMessage.js';
 
 export function broadcastMessage<T>(
   type: MessageTypeEnum,

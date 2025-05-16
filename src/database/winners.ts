@@ -1,5 +1,5 @@
-import { Player } from '../models/player.type';
-import { Winner } from '../models/winner.type';
+import { Player } from '../models/player.type.js';
+import { Winner } from '../models/winner.type.js';
 
 export const winners = new Map<string, number>();
 

@@ -1,8 +1,8 @@
 import { WebSocket } from 'ws';
 
-import { Message, MessageTypeEnum } from '../models/message.type';
-import { Player } from '../models/player.type';
-import { wss } from '../ws_server';
+import { Message, MessageTypeEnum } from '../models/message.type.js';
+import { Player } from '../models/player.type.js';
+import { wss } from '../ws_server/index.js';
 
 export function sendMessage<T>(
   type: MessageTypeEnum,

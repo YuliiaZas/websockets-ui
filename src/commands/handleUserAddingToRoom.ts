@@ -1,10 +1,10 @@
 import type { WebSocket } from 'ws';
 
-import { addPlayerToRoom } from '../database/rooms';
-import { Message, MessageTypeEnum } from '../models/message.type';
-import { Room } from '../models/room.type';
-import { getDataFromMessage } from '../utils/getDataFromMessage';
-import { isCreateRoomRequest } from '../utils/validation';
+import { addPlayerToRoom } from '../database/rooms.js';
+import { Message, MessageTypeEnum } from '../models/message.type.js';
+import { Room } from '../models/room.type.js';
+import { getDataFromMessage } from '../utils/getDataFromMessage.js';
+import { isCreateRoomRequest } from '../utils/validation.js';
 
 export function handleUserAddingToRoom(
   ws: WebSocket,

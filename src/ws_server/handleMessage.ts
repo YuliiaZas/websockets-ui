@@ -1,20 +1,20 @@
 import type { WebSocket } from 'ws';
 
-import { handleGameCreation } from '../commands/handleGameCreation';
-import { handleRegistration } from '../commands/handleRegistration';
-import { handleRoomCreation } from '../commands/handleRoomCreation';
-import { handleUserAddingToRoom } from '../commands/handleUserAddingToRoom';
-import { getRooms, isRoomFull } from '../database/rooms';
-import { getWinners } from '../database/winners';
-import { Message, MessageTypeEnum } from '../models/message.type';
-import { AddUserToRoomRequest } from '../models/requests/addUserToRoom.type';
-import { Room } from '../models/room.type';
-import { Winner } from '../models/winner.type';
-import { broadcastMessage } from '../utils/broadcastMessag';
+import { handleGameCreation } from '../commands/handleGameCreation.js';
+import { handleRegistration } from '../commands/handleRegistration.js';
+import { handleRoomCreation } from '../commands/handleRoomCreation.js';
+import { handleUserAddingToRoom } from '../commands/handleUserAddingToRoom.js';
+import { getRooms, isRoomFull } from '../database/rooms.js';
+import { getWinners } from '../database/winners.js';
+import { Message, MessageTypeEnum } from '../models/message.type.js';
+import { AddUserToRoomRequest } from '../models/requests/addUserToRoom.type.js';
+import { Room } from '../models/room.type.js';
+import { Winner } from '../models/winner.type.js';
+import { broadcastMessage } from '../utils/broadcastMessag.js';
 import {
   createMessagePayload,
   sendMessageWithPayload,
-} from '../utils/sendMessage';
+} from '../utils/sendMessage.js';
 
 export function handleMessage(ws: WebSocket, message: Message) {
   switch (message.type) {

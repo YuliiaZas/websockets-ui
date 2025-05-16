@@ -1,7 +1,7 @@
 import { WebSocketServer } from 'ws';
 
-import { Message } from '../models/message.type';
-import { handleMessage } from './handleMessage';
+import { Message } from '../models/message.type.js';
+import { handleMessage } from './handleMessage.js';
 
 const WS_PORT = 3000;
 export const wss = new WebSocketServer({ port: WS_PORT });

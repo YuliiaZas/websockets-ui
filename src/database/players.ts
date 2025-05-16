@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 
-import { Player } from '../models/player.type';
+import { Player } from '../models/player.type.js';
 
 export const players = new Map<string, Player>();
 

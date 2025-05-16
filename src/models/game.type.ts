@@ -1,4 +1,4 @@
-import { Ship } from './ship.type';
+import { Ship } from './ship.type.js';
 
 export type Game = {
   gameId: string;

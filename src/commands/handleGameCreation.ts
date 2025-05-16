@@ -1,14 +1,14 @@
 import type { WebSocket } from 'ws';
 
-import { createGame } from '../database/games';
+import { createGame } from '../database/games.js';
 import {
   deleteRoom,
   getRoomsIdsByPlayerId,
   removePlayerFromRoom,
-} from '../database/rooms';
-import { MessageTypeEnum } from '../models/message.type';
-import { Room } from '../models/room.type';
-import { broadcastMessage } from '../utils/broadcastMessag';
+} from '../database/rooms.js';
+import { MessageTypeEnum } from '../models/message.type.js';
+import { Room } from '../models/room.type.js';
+import { broadcastMessage } from '../utils/broadcastMessag.js';
 
 export function handleGameCreation(ws: WebSocket, room: Room) {
   const gamePlayresIds = room.roomUsers.map((user) => user.index);

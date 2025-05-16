@@ -1,5 +1,5 @@
-import { AddUserToRoomRequest } from '../models/requests/addUserToRoom.type';
-import { RegistrationRequest } from '../models/requests/registration.type';
+import { AddUserToRoomRequest } from '../models/requests/addUserToRoom.type.js';
+import { RegistrationRequest } from '../models/requests/registration.type.js';
 
 export function isRegistrationRequest(
   data: unknown

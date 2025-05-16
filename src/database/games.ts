@@ -1,4 +1,4 @@
-import { Game } from '../models/game.type';
+import { Game } from '../models/game.type.js';
 
 export const games = new Map<string, Game>();
 

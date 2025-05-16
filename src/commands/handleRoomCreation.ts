@@ -1,6 +1,6 @@
-import { createRoom } from '../database/rooms';
-import { Message, MessageTypeEnum } from '../models/message.type';
-import { Room } from '../models/room.type';
+import { createRoom } from '../database/rooms.js';
+import { Message, MessageTypeEnum } from '../models/message.type.js';
+import { Room } from '../models/room.type.js';
 
 export function handleRoomCreation(
   message: Message,
