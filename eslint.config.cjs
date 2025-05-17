@@ -37,6 +37,21 @@ module.exports = [
           caseInsensitive: true,
         },
       }],
+      'import/extensions': [
+        'error',
+        'ignorePackages',
+        {
+          ts: 'always',
+          js: 'always',
+        },
+      ],
+    },
+    settings: {
+      'import/resolver': {
+        node: {
+          extensions: ['.js', '.ts'],
+        },
+      },
     },
     ignores: ['front/'],
   },
