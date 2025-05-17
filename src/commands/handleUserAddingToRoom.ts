@@ -28,6 +28,5 @@ export function handleUserAddingToRoom(
     }
   } catch (error) {
     console.error('Error handling user adding to room:', error);
-    return;
   }
 }

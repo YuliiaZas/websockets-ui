@@ -3,4 +3,5 @@ export type Player = {
   name: string;
   password: string;
   wins: number;
+  currentGameId?: string | null;
 };

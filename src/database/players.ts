@@ -28,3 +28,15 @@ export const getPlayerByName = (name: string): Player | undefined => {
   }
   return undefined;
 };
+
+export const updatePlayerWithCurrentGameId = (
+  playerId: string,
+  gameId: string | null
+): Player | undefined => {
+  const player = getPlayer(playerId);
+  if (!player) {
+    return undefined;
+  }
+  players.set(playerId, { ...player, currentGameId: gameId });
+  return player;
+};

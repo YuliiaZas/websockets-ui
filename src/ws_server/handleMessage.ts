@@ -1,13 +1,18 @@
 import type { WebSocket } from 'ws';
 
+import { handleAddShips } from '../commands/handleAddShips.js';
 import { handleGameCreation } from '../commands/handleGameCreation.js';
 import { handleRegistration } from '../commands/handleRegistration.js';
 import { handleRoomCreation } from '../commands/handleRoomCreation.js';
 import { handleUserAddingToRoom } from '../commands/handleUserAddingToRoom.js';
+import { isGameReady } from '../database/games.js';
 import { getRooms, isRoomFull } from '../database/rooms.js';
 import { getWinners } from '../database/winners.js';
+import { Game } from '../models/game.type.js';
 import { Message, MessageTypeEnum } from '../models/message.type.js';
 import { AddUserToRoomRequest } from '../models/requests/addUserToRoom.type.js';
+import { StartGameResponse } from '../models/requests/startGame.type.js';
+import { TurnResponse } from '../models/requests/turn.type.js';
 import { Room } from '../models/room.type.js';
 import { Winner } from '../models/winner.type.js';
 import { broadcastMessage } from '../utils/broadcastMessag.js';
@@ -17,6 +22,10 @@ import {
 } from '../utils/sendMessage.js';
 
 export function handleMessage(ws: WebSocket, message: Message) {
+  console.log(
+    `\n--> Received comnand: '${message.type}' from (${ws.player?.index || 'current'}) player`
+  );
+
   switch (message.type) {
     case MessageTypeEnum.REG:
       const onRegistrationSuccess = () => {
@@ -52,14 +61,20 @@ export function handleMessage(ws: WebSocket, message: Message) {
       handleUserAddingToRoom(ws, message, onUserAddedToRoom);
       break;
     case MessageTypeEnum.ADD_SHIPS:
-      ws.send(
-        JSON.stringify({ type: 'add_ships', data: { ships: message.data } })
-      );
-      break;
-    case MessageTypeEnum.START_GAME:
-      ws.send(
-        JSON.stringify({ type: 'start_game', data: { gameId: message.data } })
-      );
+      const onShipsAdded = (game: Game) => {
+        if (isGameReady(game.gameId)) {
+          broadcastMessage<StartGameResponse>(
+            MessageTypeEnum.START_GAME,
+            {
+              ships: game.ships[ws.player!.index],
+              currentPlayerIndex: game.currentPlayerIndex,
+            },
+            game.players
+          );
+          broadcastGameTurn(game);
+        }
+      };
+      handleAddShips(message, onShipsAdded);
       break;
     case MessageTypeEnum.ATTACK:
       ws.send(
@@ -72,11 +87,6 @@ export function handleMessage(ws: WebSocket, message: Message) {
           type: 'randomAttack',
           data: { attackData: message.data },
         })
-      );
-      break;
-    case MessageTypeEnum.TURN:
-      ws.send(
-        JSON.stringify({ type: 'turn', data: { turnData: message.data } })
       );
       break;
     case MessageTypeEnum.FINISH:
@@ -92,3 +102,10 @@ const broadcastWinners = () =>
 
 const broadcastRooms = () =>
   broadcastMessage<Room[]>(MessageTypeEnum.UPDATE_ROOM, getRooms());
+
+const broadcastGameTurn = (game: Game) =>
+  broadcastMessage<TurnResponse>(
+    MessageTypeEnum.TURN,
+    { currentPlayer: game.currentPlayerIndex },
+    game.players
+  );

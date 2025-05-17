@@ -53,8 +53,12 @@ export function sendMessageWithPayload(
     }
   }
 
+  const clientType =
+    ws || targetPlayerIds?.length === 1
+      ? `client (${ws?.player?.index || targetPlayerIds?.[0] || 'current'})`
+      : `clients (${targetPlayerIds?.length || wss.clients.size})`;
   console.log(
-    `Command '${payload.type}' sent successfully to client${ws ? '' : 's'} with data:`,
+    `<-- Command '${payload.type}' sent successfully to ${clientType} with data:`,
     payload.data
   );
 }
