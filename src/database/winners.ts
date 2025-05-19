@@ -1,14 +1,23 @@
-import { Player } from '../models/player.type.js';
 import { Winner } from '../models/winner.type.js';
+import { getPlayer } from './players.js';
 
-export const winners = new Map<string, number>();
+export const winners = new Map<string, Winner>();
 
-export const updateWinners = (player: Player) => {
-  const currentWins = winners.get(player.name) || 0;
-  winners.set(player.name, currentWins + player.wins);
+export const updateWinsForPlayer = (playerId: string) => {
+  const currentWinner = winners.get(playerId) || {
+    name: getPlayer(playerId)?.name ?? '',
+    wins: 0,
+  };
+  winners.set(playerId, {
+    ...currentWinner,
+    wins: currentWinner.wins + 1,
+  });
 };
 
-export const getWinners = (): Winner[] => {
-  const sortedWinners = [...winners.entries()].sort(([, a], [, b]) => b - a);
-  return sortedWinners.map(([name, wins]) => ({ name, wins }));
+export const getWinnersTable = (): Winner[] => {
+  const sortedWinners = [...winners.values()].sort((a, b) => b.wins - a.wins);
+  return sortedWinners.map((winner) => ({
+    name: winner.name,
+    wins: winner.wins,
+  }));
 };

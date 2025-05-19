@@ -14,3 +14,9 @@ export type Ship = {
   length: number;
   type: ShipType;
 };
+
+export type EnhancedShip = Ship & {
+  cells: Set<string>;
+  hits: Set<string>;
+  emptyCellsAround: [number, number][];
+};

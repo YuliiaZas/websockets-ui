@@ -1,16 +1,18 @@
 import type { WebSocket } from 'ws';
 
 import { handleAddShips } from '../commands/handleAddShips.js';
+import { handleAttack } from '../commands/handleAttack.js';
 import { handleGameCreation } from '../commands/handleGameCreation.js';
 import { handleRegistration } from '../commands/handleRegistration.js';
 import { handleRoomCreation } from '../commands/handleRoomCreation.js';
 import { handleUserAddingToRoom } from '../commands/handleUserAddingToRoom.js';
-import { isGameReady } from '../database/games.js';
+import { changeGameStatus, isGameReady } from '../database/games.js';
 import { getRooms, isRoomFull } from '../database/rooms.js';
-import { getWinners } from '../database/winners.js';
-import { Game } from '../models/game.type.js';
+import { getWinnersTable } from '../database/winners.js';
+import { Game, GameStatus } from '../models/game.type.js';
 import { Message, MessageTypeEnum } from '../models/message.type.js';
 import { AddUserToRoomRequest } from '../models/requests/addUserToRoom.type.js';
+import { FinishResponse } from '../models/requests/finish.type.js';
 import { StartGameResponse } from '../models/requests/startGame.type.js';
 import { TurnResponse } from '../models/requests/turn.type.js';
 import { Room } from '../models/room.type.js';
@@ -66,20 +68,21 @@ export function handleMessage(ws: WebSocket, message: Message) {
           broadcastMessage<StartGameResponse>(
             MessageTypeEnum.START_GAME,
             {
-              ships: game.ships[ws.player!.index],
+              ships: game.shipsInit[ws.player!.index],
               currentPlayerIndex: game.currentPlayerIndex,
             },
             game.players
           );
+          changeGameStatus(game, GameStatus.STARTED);
           broadcastGameTurn(game);
         }
       };
       handleAddShips(message, onShipsAdded);
       break;
     case MessageTypeEnum.ATTACK:
-      ws.send(
-        JSON.stringify({ type: 'attack', data: { attackData: message.data } })
-      );
+      handleAttack(ws, message, (game: Game) => {
+        broadcastGameStatus(game);
+      });
       break;
     case MessageTypeEnum.RANDOM_ATTACK:
       ws.send(
@@ -89,16 +92,11 @@ export function handleMessage(ws: WebSocket, message: Message) {
         })
       );
       break;
-    case MessageTypeEnum.FINISH:
-      ws.send(
-        JSON.stringify({ type: 'finish', data: { finishData: message.data } })
-      );
-      break;
   }
 }
 
 const broadcastWinners = () =>
-  broadcastMessage<Winner[]>(MessageTypeEnum.UPDATE_WINNERS, getWinners());
+  broadcastMessage<Winner[]>(MessageTypeEnum.UPDATE_WINNERS, getWinnersTable());
 
 const broadcastRooms = () =>
   broadcastMessage<Room[]>(MessageTypeEnum.UPDATE_ROOM, getRooms());
@@ -109,3 +107,16 @@ const broadcastGameTurn = (game: Game) =>
     { currentPlayer: game.currentPlayerIndex },
     game.players
   );
+
+const broadcastGameStatus = (game: Game) => {
+  if (game.gameStatus === GameStatus.FINISHED) {
+    broadcastMessage<FinishResponse>(
+      MessageTypeEnum.FINISH,
+      { winPlayer: game.winner! },
+      game.players
+    );
+    broadcastWinners();
+  } else {
+    broadcastGameTurn(game);
+  }
+};
