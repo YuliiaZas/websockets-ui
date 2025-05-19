@@ -18,6 +18,9 @@ export type Game = {
   shipsInit: {
     [indexPlayer: string]: Ship[];
   };
+  attackHistory: {
+    [indexPlayer: string]: Set<string>;
+  };
   gameStatus: GameStatus;
   winner: string | null;
 };

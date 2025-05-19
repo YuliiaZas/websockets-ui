@@ -4,6 +4,11 @@ export enum AttackStatus {
   KILLED = 'killed',
 }
 
+export type RandomAttackRequest = {
+  gameId: string;
+  indexPlayer: string;
+};
+
 export type AttackRequest = {
   gameId: string;
   indexPlayer: string;

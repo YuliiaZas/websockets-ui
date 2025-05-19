@@ -11,6 +11,7 @@ export const createGame = (gameId: string, players: string[]): Game => {
     currentPlayerIndex: players[0],
     shipsInit: {},
     shipsCurrent: {},
+    attackHistory: {},
     gameStatus: GameStatus.WAITING,
     winner: null,
   };
@@ -41,7 +42,6 @@ export const addShips = (
       [playerId]: buildEnhancedShips(ships),
     },
   };
-  console.log('Updated game:', updatedGame);
 
   games.set(gameId, updatedGame);
 

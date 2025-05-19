@@ -3,6 +3,8 @@ import { Game } from '../models/game.type.js';
 import { AttackStatus } from '../models/requests/attack.type.js';
 import { EnhancedShip, Ship } from '../models/ship.type.js';
 
+const boardSize = 10;
+
 export function buildEnhancedShips(ships: Ship[]): EnhancedShip[] {
   return ships.map((ship) => {
     const cells = new Set<string>();
@@ -28,6 +30,7 @@ export function processAttack(
   allShipCells?: [number, number][];
   isAllSunk?: boolean;
 } | null {
+  const playerId = game.currentPlayerIndex;
   const enemyIndex = getEnemyIndex(game);
   const enhancedShips = game.shipsCurrent[enemyIndex];
   if (!enhancedShips) {
@@ -35,6 +38,18 @@ export function processAttack(
   }
 
   const key = `${x},${y}`;
+
+  if (!game.attackHistory[playerId]) {
+    game.attackHistory[playerId] = new Set<string>();
+  }
+
+  if (game.attackHistory[playerId].has(key)) {
+    throw new Error(
+      `Cell (${x}, ${y}) has already been attacked by this player.`
+    );
+  }
+
+  game.attackHistory[playerId].add(key);
 
   for (let i = 0; i < enhancedShips.length; i++) {
     const ship = enhancedShips[i];
@@ -49,6 +64,10 @@ export function processAttack(
           ...enhancedShips.slice(i + 1),
         ];
 
+        for (const [xEmpty, yEmpty] of ship.emptyCellsAround) {
+          game.attackHistory[playerId].add(`${xEmpty},${yEmpty}`);
+        }
+
         return {
           status: AttackStatus.KILLED,
           cellsArround: ship.emptyCellsAround,
@@ -62,6 +81,27 @@ export function processAttack(
     }
   }
   return { status: AttackStatus.MISS };
+}
+
+export function getRandomAttackCoordinates(
+  game: Game
+): { x: number; y: number } | null {
+  const playerId = game.currentPlayerIndex;
+  const attacked = game.attackHistory[playerId] ?? new Set<string>();
+
+  const maxAttempts = boardSize * boardSize;
+
+  for (let i = 0; i < maxAttempts; i++) {
+    const x = Math.floor(Math.random() * boardSize);
+    const y = Math.floor(Math.random() * boardSize);
+    const key = `${x},${y}`;
+
+    if (!attacked.has(key)) {
+      return { x, y };
+    }
+  }
+
+  return null;
 }
 
 function getEmptyCellsArroundShip(ship: Ship): [number, number][] {
@@ -94,5 +134,5 @@ function getEmptyCellsArroundShip(ship: Ship): [number, number][] {
 }
 
 function isCellInsideField([x, y]: [number, number]) {
-  return x >= 0 && x < 10 && y >= 0 && y < 10;
+  return x >= 0 && x < boardSize && y >= 0 && y < boardSize;
 }

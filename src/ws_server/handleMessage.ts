@@ -1,7 +1,7 @@
 import type { WebSocket } from 'ws';
 
 import { handleAddShips } from '../commands/handleAddShips.js';
-import { handleAttack } from '../commands/handleAttack.js';
+import { handleAttack, handleRandomAttack } from '../commands/handleAttack.js';
 import { handleGameCreation } from '../commands/handleGameCreation.js';
 import { handleRegistration } from '../commands/handleRegistration.js';
 import { handleRoomCreation } from '../commands/handleRoomCreation.js';
@@ -85,12 +85,9 @@ export function handleMessage(ws: WebSocket, message: Message) {
       });
       break;
     case MessageTypeEnum.RANDOM_ATTACK:
-      ws.send(
-        JSON.stringify({
-          type: 'randomAttack',
-          data: { attackData: message.data },
-        })
-      );
+      handleRandomAttack(ws, message, (game: Game) => {
+        broadcastGameStatus(game);
+      });
       break;
   }
 }

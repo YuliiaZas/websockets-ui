@@ -13,9 +13,12 @@ import {
   AttackStatus,
 } from '../models/requests/attack.type.js';
 import { broadcastMessage } from '../utils/broadcastMessag.js';
-import { processAttack } from '../utils/gameUtils.js';
+import {
+  getRandomAttackCoordinates,
+  processAttack,
+} from '../utils/gameUtils.js';
 import { getDataFromMessage } from '../utils/getDataFromMessage.js';
-import { isAttackRequest } from '../utils/validation.js';
+import { isAttackRequest, isRandomAttackRequest } from '../utils/validation.js';
 
 export function handleAttack(
   ws: WebSocket,
@@ -106,5 +109,36 @@ export function handleAttack(
     }
   } catch (error) {
     console.error('Error handling attack:', error);
+  }
+}
+
+export function handleRandomAttack(
+  ws: WebSocket,
+  message: Message,
+  onSuccessCallback?: (game: Game) => void
+) {
+  if (message.type !== MessageTypeEnum.RANDOM_ATTACK) return;
+  try {
+    const attackData = getDataFromMessage(message);
+    if (!isRandomAttackRequest(attackData)) {
+      throw new Error('Invalid data format');
+    }
+    const randomCoordinates = getRandomAttackCoordinates(
+      getGame(attackData.gameId)!
+    );
+    const attackMessage = {
+      ...message,
+      type: MessageTypeEnum.ATTACK,
+      data: JSON.stringify({
+        ...attackData,
+        ...randomCoordinates,
+      }),
+    };
+
+    handleAttack(ws, attackMessage, (game: Game) => {
+      onSuccessCallback && onSuccessCallback(game);
+    });
+  } catch (error) {
+    console.error('Error handling random attack:', error);
   }
 }

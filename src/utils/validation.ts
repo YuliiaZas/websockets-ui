@@ -1,6 +1,9 @@
 import { AddShipsRequest } from '../models/requests/addShips.type.js';
 import { AddUserToRoomRequest } from '../models/requests/addUserToRoom.type.js';
-import { AttackRequest } from '../models/requests/attack.type.js';
+import {
+  AttackRequest,
+  RandomAttackRequest,
+} from '../models/requests/attack.type.js';
 import { RegistrationRequest } from '../models/requests/registration.type.js';
 import { Ship, ShipType } from '../models/ship.type.js';
 
@@ -75,5 +78,18 @@ export function isAttackRequest(data: unknown): data is AttackRequest {
     typeof (data as AttackRequest).indexPlayer === 'string' &&
     typeof (data as AttackRequest).x === 'number' &&
     typeof (data as AttackRequest).y === 'number'
+  );
+}
+
+export function isRandomAttackRequest(
+  data: unknown
+): data is RandomAttackRequest {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'gameId' in data &&
+    'indexPlayer' in data &&
+    typeof (data as AttackRequest).gameId === 'string' &&
+    typeof (data as AttackRequest).indexPlayer === 'string'
   );
 }
